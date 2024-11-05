@@ -1,4 +1,3 @@
-// game.js
 const gameContainer = document.getElementById('game-container');
 const player = document.getElementById('player');
 let isJumping = false;
@@ -9,12 +8,23 @@ let score = 0;
 const obstacleSpeed = 3;
 let obstacles = [];
 let isGameOver = false;
+let playerPositionX = 50; // Starting position of player on X axis
+const playerSpeed = 5; // How fast the player moves left/right
 
-document.addEventListener('keydown', () => {
-  if (!isJumping) {
+// Handle key events
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'Space' && !isJumping) {
     isJumping = true;
-    playerVelocity = -10; // initial jump speed
+    playerVelocity = -10; // Initial jump speed
+  } else if (event.code === 'ArrowRight') {
+    playerPositionX += playerSpeed; // Move player to the right
+  } else if (event.code === 'ArrowLeft') {
+    playerPositionX -= playerSpeed; // Move player to the left
   }
+
+  // Prevent player from going off-screen
+  if (playerPositionX < 0) playerPositionX = 0; // Left boundary
+  if (playerPositionX > window.innerWidth - 50) playerPositionX = window.innerWidth - 50; // Right boundary
 });
 
 function gameLoop() {
@@ -23,54 +33,7 @@ function gameLoop() {
     return;
   }
 
-  // Move the player
+  // Move the player vertically (jumping)
   if (isJumping) {
     playerVelocity += gravity;
-    player.style.bottom = `${parseFloat(player.style.bottom) + playerVelocity}px`;
-
-    if (parseFloat(player.style.bottom) <= 0) {
-      isJumping = false;
-      player.style.bottom = '0';
-      playerVelocity = 0;
-    }
-  }
-
-  // Create and move obstacles
-  if (Math.random() < 0.02) {
-    const obstacle = document.createElement('div');
-    obstacle.classList.add('obstacle');
-    obstacle.style.left = '100vw'; // Position it off-screen
-    gameContainer.appendChild(obstacle);
-    obstacles.push(obstacle);
-  }
-
-  obstacles.forEach((obstacle, index) => {
-    let obstaclePos = parseFloat(obstacle.style.left);
-    obstaclePos -= obstacleSpeed;
-    obstacle.style.left = `${obstaclePos}px`;
-
-    // Collision detection
-    if (
-      obstaclePos >= 50 && obstaclePos <= 100 && // Obstacle is within the player's X range
-      parseFloat(player.style.bottom) <= 50 // Player is on the ground
-    ) {
-      if (!isJumping) {
-        isGameOver = true; // Player collided with obstacle
-      }
-    }
-
-    // Remove obstacles that are off-screen
-    if (obstaclePos < -50) {
-      obstacle.remove();
-      obstacles.splice(index, 1);
-      score++;
-    }
-  });
-
-  if (!isGameOver) {
-    requestAnimationFrame(gameLoop); // Continue the game loop
-  }
-}
-
-// Start the game loop
-gameLoop();
+    player.style.bottom = `${parseFloat(player.style.
